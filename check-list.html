@@ -1,0 +1,136 @@
+<html>
+  <head>
+    <title>Check Photo List</title>
+    <script src="trial-params.js"></script>
+    <script src="photos.js"></script>
+    <script src="ROI.js"></script>
+    <script src="papaparse.min.js"></script>
+    <script>
+      'use strict';
+    </script>
+
+    <style>
+      p {margin: 0; padding: 1ex; }
+      .v { vertical-align: top }
+      .h { text-align: right; font-weight: bold }
+      .err { color: red; font-weight: bold }
+      code { font-weight: bold }
+      #filemsg { display: none; max-width: 26em; border: 2px solid black; border-radius: 4px; padding: 1ex; background: #ffffdd; }
+      #summaryTable { border: 2px solid darkBlue; border-radius: 4px; padding: .5ex }
+      .num { text-align: right; }
+    </style>
+  </head>
+  <body>
+    <h1>Check Photo List</h1>
+    
+    <p>This page is used to check the content of <code>trial-params.js</code> and <code id="CSV"></code>.</p>
+
+    <div id="filemsg"><p>This file <em class="err">does not work</em>
+        when browsed directly as a file (i.e. as you have just
+        done). It must be accessed via a web server.</p>
+
+      <p>That's because, for your privacy and security, browsers are
+      not generally allowed to access files on your computer.</p></div>
+
+    <p>If any of the checkboxes below are not checked, there is a problem with <code>trial-params.js</code>.</p>
+    
+    <table>
+      <tr>
+        <td>escapeTimeout is defined?</td>
+        <td><input type="checkbox" id="timeoutCB"></td>
+      </tr>
+      <tr>
+        <td>revealTime is defined?</td>
+        <td><input type="checkbox" id="revealTimeCB"></td>
+      </tr>
+      <tr>
+        <td>numPhotos is defined?</td>
+        <td><input type="checkbox" id="numPhotosCB"></td>
+      </tr>
+      <tr>
+        <td>PHOTOS_INFO_URL is defined?</td>
+        <td><input type="checkbox" id="PHOTOS_INFO_URLCB"></td>
+      </tr>
+    </table>
+
+    <h2>Summary of photos</h2>
+    <p>
+      <table id="summaryTable">
+        <tr><th class="h">Predator</th><th class="h">Number of photos</th></tr>
+      </table>
+    </p>
+
+    <h2>Photos</h2>
+    <p>Every row in the table below should have an image in the right
+    column. All images should have the same size. Every image should
+    have the ROI drawn in a thick red line.</p>
+
+    <p>
+      <table id="imagesTable">
+        <tr><th>Values</th><th>Image</th></tr>
+      </table>
+    </p>
+
+    <script>
+      if (location.protocol == "file:")
+          document.getElementById("filemsg").style.display = "block";
+      
+      document.getElementById("CSV").innerText = PHOTOS_INFO_URL;
+      document.getElementById("revealTimeCB").checked = revealTime;
+      document.getElementById("timeoutCB").checked = escapeTimeout;
+      document.getElementById("numPhotosCB").checked = numPhotos;
+      document.getElementById("PHOTOS_INFO_URLCB").checked = PHOTOS_INFO_URL;
+
+      async function addPhotoRow(idx, photo, table) {
+          var row = table.insertRow(-1);
+          function tblRow(label, value) { return "<tr><td class='h'>" + label + "</td><td>" + value + "</td></tr>"; }
+          function attrRow(attr) { return tblRow(attr.charAt(0).toUpperCase() + attr.slice(1), photo[attr]); }
+          const cvId = "i" + idx;
+          row.innerHTML = "<td class='v'>" +
+              "<table>" +
+              tblRow("Image", idx + 1) +
+              attrRow("species") + 
+              attrRow("sex") + 
+              attrRow("angle") + 
+              attrRow("visualModel") + 
+              attrRow("url") + 
+              attrRow("ROI") + 
+              "</table>" + 
+              "</td>" + 
+              "<td><canvas id='" + cvId + "'></td>";
+          
+          // Fetch photo and ROI, and display when ready
+          const [img, roi] = await LoadImageAndROI(photo);
+
+          const can = document.getElementById(cvId);
+          const ctx = can.getContext('2d');
+          // Adjust canvas size to match image
+          can.width = img.width;
+          can.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          // Draw the ROI
+          roi.draw(ctx, "red", 4);
+      }
+
+      function addSummaryRow(numPhotos, table) {
+          const row = table.insertRow(-1);
+          row.innerHTML = "<td class='num'>" + numPhotos + "</td>";
+      }
+
+      function showPhotos(data) {
+          let iTableRef = document.getElementById('imagesTable').getElementsByTagName('tbody')[0];
+          for (let i = 0; i < data.length; i++) {
+              addPhotoRow(i, data[i], iTableRef);
+          }
+
+          // Fill in summary details
+          let sTableRef = document.getElementById('summaryTable').getElementsByTagName('tbody')[0];
+          addSummaryRow("Total", data.length, sTableRef);
+      }
+      
+      ReadPhotosCSV(PHOTOS_INFO_URL, showPhotos);
+      
+    </script>
+  </body>
+</html>

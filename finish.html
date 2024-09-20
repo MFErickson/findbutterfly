@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>Find the Butterfly</title>
+    <link href="trial.css" rel="stylesheet">
+    <script src="trial.js"></script>
+    <script src="trial-params.js"></script>
+    <script src="logger.js"></script>
+    <script src="mfb.js"></script>
+    <script src="user.js"></script>
+    <script src="setup.js"></script>
+    <script src="papaparse.min.js"></script>
+    <script language="javascript">
+
+      // Displays the uer's total time taken
+      function showTime(time) {
+          var elems = document.body.querySelectorAll(".showtime");
+          for (let elem of elems) {
+              elem.innerHTML = (time / 1000).toFixed(1);
+          }
+      }
+
+      
+      // ---- Startup function ----
+
+    </script>
+    <style>
+      #mistakes { border:4px solid #e8514e; border-radius: 1ex; display: none; }
+    </style>
+  </head>
+  <body id="finish">
+    <div id="watermark" style="display:none">
+      <div class="text">DEBUG ONLY</div>
+    </div>
+
+    <h1>Find the Butterfly</h1>
+
+    <p>
+      Thanks for participating!
+      You found <span id="numRight" class ="label"></span> out of
+      <span id="numTotal" class="label"></span> butterflies
+      in <span class="label"><span class="showtime">1000</span>
+      seconds!</span>
+      <span id="congrats"></span>
+    </p>
+
+    <p>
+      <a class="button" href="trial.html?noob=F">Try again</a>
+
+
+    
+      <!-- ==================================================================== -->
+      <!-- The core Firebase JS SDK is always required and must be listed first -->
+      <script src="https://www.gstatic.com/firebasejs/5.11.1/firebase-app.js"></script>
+      <!-- <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script> -->
+      <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-database.js"></script>
+      <script>
+        /*InitFirebase();*/
+      </script>
+      <!-- ==================================================================== -->
+
+  </body>
+  <script language="javascript">
+    showTime(getCookie("totalTime"));
+    var total = parseInt(getCookie("totalScored")) || 0;
+    var errors = JSON.parse(getCookie("errors") || "[]");
+    var numErrors = errors.length;
+    document.getElementById("numRight").innerText = total - numErrors;
+    document.getElementById("numTotal").innerText = total + 0;
+    document.getElementById("congrats").innerText = numErrors == 0 ? "Perfect!" :
+                                                    numErrors / total < .2 ? "Excellent!" :
+                                                    numErrors / total < .5 ? "Well done!" :
+                                                    "Good effort!";
+  </script>
+</html>

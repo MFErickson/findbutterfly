@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>Find the Butterfly</title>
+    <link href="trial.css" rel="stylesheet">
+    <!-- Required for list of predators -->
+    <script src="photos.js"></script>
+    <!-- Required for trial parameters -->
+    <script src="trial-params.js"></script>
+    <script src="papaparse.min.js"></script>
+  </head>
+  <body id="start">
+
+    <h1>Get ready!</h1>
+    <p>You will be shown <span id="numPhotos">XXX</span>
+      photos of butterflies. You have <span class="label"><span id="numSeconds">XXX</span>
+        seconds</span>
+      to find and click on the butterfly in each photo.
+
+    <h3>Have you played this game before?</h3>
+    <p>
+      <a class="button" id="noob">No, this is my first time</a>
+      <a class="button" id="expert">Yes, I've played before</a>
+
+  </body>
+
+  <script>
+    // Fill in changeable parameters
+    document.getElementById("numPhotos").innerText = numPhotos;
+    document.getElementById("numSeconds").innerText = escapeTimeout / 1000;
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    // Handle button clicks
+    function gotoTrial(noob) {
+        window.location = "trial.html?noob=" + noob;
+    }
+    
+    document.getElementById("noob").addEventListener('click', () => gotoTrial("T"));
+    document.getElementById("expert").addEventListener('click', () => gotoTrial("F"));
+
+  </script>
+</html>

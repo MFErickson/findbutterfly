@@ -1,0 +1,88 @@
+
+<!-- saved from url=(0089)file:///C:/Jim/uni/Papers%20and%20talks/Frickin%20lasers/Smoke%20and%20mirrors/play.html# -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+    <title>Speaker driver</title>
+    <style>
+      .h { text-align: right; }
+    </style>
+  </head>
+  <body>
+    <h1>Speaker driver</h1>
+
+    <table>
+      <tbody><tr>
+        <td class="h">Frequency:</td>
+        <td><input id="freq" value="100"></td>
+      </tr>
+      <tr>
+        <td class="h">Duration (seconds):</td>
+        <td><input id="dur" value="2"></td>
+      </tr>
+      <tr>
+        <td class="h">Amplitude (0-1):</td>
+        <td><input id="amp" value="0.8"></td>
+      </tr>
+    </tbody></table>
+     
+    <a href="file:///C:/Jim/uni/Papers%20and%20talks/Frickin%20lasers/Smoke%20and%20mirrors/play.html#" id="play">Play it</a>
+
+    <p>Sample rate is <span id="samplerate">48000</span>
+
+    <script>
+
+      let context = null;
+
+      /* Left and right should have the same length. */
+      function playSound(left, right) {
+          var buf = new Float32Array(left.length + right.length);
+          for (var i = 0; i < left.length; i++) {
+              buf[i] = left[i];
+          }
+          for (var i = 0; i < right.length; i++) {
+              buf[i + left.length] = right[i];
+          }
+          var buffer = context.createBuffer(2, buf.length / 2, context.sampleRate);
+          buffer.copyToChannel(buf, 0);
+          var source = context.createBufferSource();
+          source.buffer = buffer;
+          source.connect(context.destination);
+          source.start(0);
+      }
+      
+      function sineWaveAt(sampleNumber, tone) {
+          var sampleFreq = context.sampleRate / tone
+          return Math.sin(sampleNumber / (sampleFreq / (Math.PI*2)))
+      }
+
+      function play() {
+          if (context == null) {
+              try {
+                  // Fix up for prefixing
+                  window.AudioContext = window.AudioContext||window.webkitAudioContext;
+                  context = new AudioContext();
+
+                  document.getElementById("samplerate").innerText = context.sampleRate;
+              }
+              catch(e) {
+                  alert('Web Audio API is not supported in this browser');
+              }
+          }
+
+          const freq = parseFloat(document.getElementById("freq").value);
+          const amplitude = parseFloat(document.getElementById("amp").value);
+          const duration = parseFloat(document.getElementById("dur").value);
+          
+          const left = [];
+          const right = [];
+          for (let i = 0; i < context.sampleRate * duration; i++) {
+              left[i] = sineWaveAt(i, freq * .6) * amplitude;
+              right[i] = sineWaveAt(i, freq) * amplitude
+          }
+          playSound(left, right);
+      }
+
+      document.getElementById("play").addEventListener("click", play);
+    </script>
+  
+
+</p></body></html>

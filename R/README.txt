@@ -1,0 +1,1 @@
+Script to update the photo_info.csv file, which lists all the available butterfly and background images

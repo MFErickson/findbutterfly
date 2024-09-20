@@ -1,0 +1,1 @@
+Mongoose is a free lightweight web server. Just click it and it serves up the current directory on port 8080. Useful here for testing cookies and reading files
