@@ -86,9 +86,16 @@ QueryFirebase <- function(startTime = NULL) {
 fbd <- QueryFirebase()
 # Get types of data
 types <- unique(sapply(fbd, function(row) row$type))
-# Output a CSV for each type of data
-for (type in types) {
-  typeRows <- Filter(function(row) row$type == type, fbd)
-  df <- do.call(rbind, typeRows)
-  write.csv(df, paste0(type, ".csv"), row.names = FALSE)
+badTypes <- types[!types %in% c("score", "session")]
+if (length(badTypes) > 0) {
+  stop(sprintf("Unexpected type %s", paste(badTypes, collapse = ", ")))
 }
+
+# Load table of scores
+scores <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "score", fbd)))
+sessions <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "session", fbd)))
+
+# Output a CSV for each type of data
+write.csv(scores, "score.csv", row.names = FALSE)
+write.csv(sessions, "session.csv", row.names = FALSE)
+

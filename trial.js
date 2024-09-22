@@ -32,6 +32,10 @@ function GetUrlParam(name) {
     return new URLSearchParams(window.location.search).get(name);
 }
 
+function basename(path) {
+    return path.split(/[\\/]/).pop();
+}
+
 // =========================
 
 // A class which controls the logic of a trial
@@ -116,9 +120,10 @@ class Trial {
         ctx.drawImage(back, 0, 0, cnv.width, cnv.height);
 
         // Draw the butterfly
-        const width = Math.round(butt.naturalWidth * buttScale);
+        const useScale = buttScale * cnv.width;
+        const width = Math.round(butt.naturalWidth * useScale);
         const w2 = width / 2
-        const height = Math.round(butt.naturalHeight * buttScale);
+        const height = Math.round(butt.naturalHeight * useScale);
         const h2 = height / 2;
         const size = Math.max(width, height) * 2;
         
@@ -152,7 +157,8 @@ class Trial {
         this.soundEffects.playMiss();
         // Record the miss
         var nMilliSecs = Date.now() - this.startTime;
-        this.logger.logImageScore(this.photos.currentButterfly.URL, this.photos.currentBackground.URL,
+        this.logger.logImageScore(basename(this.photos.currentButterfly.URL),
+                                  basename(this.photos.currentBackground.URL),
                                   this.pos, "miss", nMilliSecs);
     }
 
@@ -316,7 +322,8 @@ class Trial {
         this.disableButtons();
 
         var nMilliSecs = this.stopTiming();
-        this.logger.logImageScore(this.photos.currentButterfly.URL, this.photos.currentBackground.URL,
+        this.logger.logImageScore(basename(this.photos.currentButterfly.URL),
+                                  basename(this.photos.currentBackground.URL),
                                   this.pos, score, nMilliSecs);
         
         this.totalScored++;
