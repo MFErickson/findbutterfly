@@ -40,7 +40,7 @@ DB_DOCUMENT <- "butt-scores"
 #' @export
 #' @examples
 #' \dontrun{
-#' auth(projectAPI = "AIzaSyAjZLO9-CRV3gObpwdFz-k8AiTOxHSBmdc", email = "robin@kohze.com", password = "12341234")
+#' auth(projectAPI = "XXX", email = "xxx@example.com", password = "12341234")
 #' }
 auth <- function(projectAPI, email="prompt", password="prompt"){
   if (password == "prompt" && email == "prompt") {
