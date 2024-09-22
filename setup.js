@@ -14,7 +14,7 @@ function IsDebugging() {
 // logger, but when debugging, it will be a console logger.  
 //
 // If running in debug mode, the "#watermark" style.display is cleared
-function ChooseLogger(debug) {
+function ChooseLogger(debug, firestore) {
     // Get the data logger
     var logger = null;
     if (debug) {
@@ -26,8 +26,8 @@ function ChooseLogger(debug) {
             ele.style.display = "";
     } else {
         // This logger writes to a Firebase database
-        InitFirebase();
-        logger = new FirebaseLogger(GetUserId());
+        //InitFirebase();
+        logger = new FirebaseLogger(GetUserId(), firestore);
     }
     return logger;
 }

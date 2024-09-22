@@ -66,15 +66,16 @@ class ConsoleDataLogger {
 // Google Firebase logging
 
 class FirebaseLogger extends ConsoleDataLogger {
+    
     _log(obj) {
         // Add sessionId
         obj = this.fillIn(obj);
         // Add created_at field
         obj.created_at = new Date().toISOString();
         //console.log("FIREBASE: " + this.jsonify(obj));
-        firebase.database().ref('mimic-scores').push().set(obj)
+        firebase.database().ref('butt-scores').push().set(obj)
             .then(function(snapshot) {
-                //console.log('FIREBASE success: ' + snapshot);
+                // console.log('FIREBASE success: ' + snapshot);
                 //success(); // some success method
             }, function(error) {
                 console.log('FIREBASE error: ' + error);

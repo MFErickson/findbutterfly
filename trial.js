@@ -135,8 +135,8 @@ class Trial {
         this.pos = {cx: cx - w2, cy: cy - h2, width: width, height: height, rot: photos.currentRot};
         
         // Prepare the ROI for hit testing
-        //const roi = new ROI([[x, y], [x, y + height], [x + width, y + height], [x + width, y], [x, y]]);
-        const roi = new ROI([[-w2, -h2], [-w2, h2], [w2, h2], [w2, -h2], [-w2, -h2]]);
+        const b = 5;   // Buffer to ease clicking on small butterflies
+        const roi = new ROI([[-w2 - b, -h2 - b], [-w2 - b, h2 + b], [w2 + b, h2 + b], [w2 + b, -h2 - b], [-w2 - b, -h2 - b]]);
 
         roi.stroke(ctx);
     }
@@ -178,17 +178,19 @@ class Trial {
         added to the document, its ID set to "photo", "loading" is
         removed from its class, and the countdown timer is started. */
     async loadCurrentPhoto() {
-        //const [img, roi] = await LoadImageAndROI(photo);
         const [butt, back] = await this.photos.loadCurrent();
 
         // We want the new element to be briefly visible at the same time as the old element
         var old = document.getElementById(this.photoEleId);
+        var oldPar = old.parentElement;
 
         // Create a new canvas element
         const cnv = document.createElement("canvas");
         // Set the canvas drawing area == element size or else it gets scaled!
-        cnv.width = old.width;
-        cnv.height = old.height;
+        cnv.width = oldPar.offsetWidth;
+        cnv.height = oldPar.offsetHeight;
+        // cnv.width = old.width;
+        // cnv.height = old.height;
         cnv.className = this.photoEleId + " loading";
         // Clear ID on old element, and...
         old.id = null;
@@ -237,8 +239,8 @@ class Trial {
 
     revealAnswer(cnv) {
         const ctx = cnv.getContext('2d')
-        ctx.strokeStyle = "orange";
-        ctx.lineWidth = 2;
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 4;
         ctx.stroke();
 
         // Give them a chance to see it

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <title>Find the Butterfly</title>
@@ -32,15 +33,24 @@
     </div>
 
     <!-- ==================================================================== -->
-    <!-- The core Firebase JS SDK is always required and must be listed first -->
-    <script src="https://www.gstatic.com/firebasejs/5.11.1/firebase-app.js"></script>
-    <!-- <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-auth.js"></script> -->
-    <script src="https://www.gstatic.com/firebasejs/3.1.0/firebase-database.js"></script>
+    <!-- The core Firebase JS SDK is always required and must be listed first.
+         When not using modules, we are restricted to Firebase version 8 or earlier! 
+         See https://firebase.google.com/docs/web/learn-more?authuser=0#ways-to-add-web-sdks 
+         I worked out the URLs by trial and error. -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
     <script>
+
+
+    // Initialize Firebase
+    let fsapp = firebase.initializeApp(firebaseConfig);
+
       function StartTrial() {
           // is this for debugging only (i.e. not real data)?
           let debug = IsDebugging();
-          debug = true;
+          // debug = true;         // For now!!!
+
           // Is this the user's first attempt?
           const noob = GetUrlParam("noob") == "T";
 

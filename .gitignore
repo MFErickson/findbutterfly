@@ -2,3 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+.Renviron
+mongoose-free-6.9.exe
+R/*.csv

@@ -49,7 +49,14 @@ a.button:active{
  box-shadow:inset 0 0.6em 2em -0.3em rgba(0,0,0,0.15),inset 0 0 0em 0.05em rgba(255,255,255,0.12);
 }
 
-/* Big buttons on high-res phones */
+/* -------------- Front (and other) page --------------- */
+body#index, body#start, body#finish {background: #f8f8f8; color: #080008; font-size:120% }
+body#index { max-width: 53em; margin: auto }
+a.play { display:inline-block; clear:left; padding: .5em; }
+a.consent { display:none; clear:left; padding: .8em; }
+a.play, a.consent { color: #e7fbeb }
+
+/* Big buttons and text on high-res phones */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
        only screen and (   min--moz-device-pixel-ratio: 2),
        only screen and (     -o-min-device-pixel-ratio: 2/1),
@@ -57,17 +64,14 @@ a.button:active{
        only screen and (                min-resolution: 192dpi),
        only screen and (                min-resolution: 2dppx) { 
 
+    * {
+        font-size: 120%;
+    }
+    body#index, body#start, body#finish { font-size:140% }
     a.button {
         font-size: 180%;
     }
 }
-
-/* -------------- Front (and other) page --------------- */
-body#index, body#start, body#finish {background: #f8f8f8; color: #080008; font-size:120% }
-body#index { max-width: 53em; margin: auto }
-a.play { display:inline-block; clear:left; padding: .5em; }
-a.consent { display:none; clear:left; padding: .8em; }
-a.play, a.consent { color: #e7fbeb }
 
 /* -------------- Start page --------------- */
 #start li { list-style-type: none; padding: .5ex 0; font-size: larger; }
@@ -76,8 +80,8 @@ a.play, a.consent { color: #e7fbeb }
 /* Main image, fit to screen */
 body#trial { background: black; color: #e0e0e0; }
 
-#trial .imgbox {width: 500px; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);  }
-#trial .holder { width: 500px; height: 333px; }
+#trial .imgbox {width: 24em; height: 16em; position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+#trial .holder { width: 100%; height: 100%; }
 #trial .holder .photo {position: absolute;
                        /* Don't set canvas size in CSS, it scales the canvas! */
                        top: 0; bottom: 0; left: 0; right: 0;
