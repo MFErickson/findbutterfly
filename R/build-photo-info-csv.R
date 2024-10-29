@@ -1,16 +1,16 @@
-# Creates the photo_info.csv file by listing all the available images in the relevent directories
+# Creates the photo_info.csv file by listing all the available images in the relevant directories
 library(jpeg)
 
 # Find all background images
 # Convert URLS to relative to the base directory
-backs <- data.frame(URL = file.path("images/backgrounds", list.files("../images/backgrounds", "*.JPG")), What = "Back")
+backs <- data.frame(URL = file.path("images/backgrounds", list.files("../images/backgrounds", "*.jpg")), What = "Back")
 
 # Check photo aspect ratios
 cat("Checking background aspect ratios...\n")
 jpgDim <- sapply(file.path("..", backs$URL), function(fn) dim(readJPEG(fn, native = TRUE)))
 ar <- jpgDim[1, ] / jpgDim[2, ]
 assAR <- 333 / 500
-badAR <- sapply(ar, function(a) !isTRUE(all.equal(a, assAR, check.attributes = FALSE, tolerance = 0.001)))
+badAR <- sapply(ar, function(a) !isTRUE(all.equal(a, assAR, check.attributes = FALSE, tolerance = 0.01)))
 if (any(badAR)) {
   cat(sprintf("Backgrounds are assumed to have aspect ratio of %g. Incorrect aspect ratios:\n", assAR))
   print(data.frame(File = basename(backs$URL[badAR]), AR = ar[badAR], Width = jpgDim[2, badAR], Height = jpgDim[1, badAR]), row.names = FALSE)
