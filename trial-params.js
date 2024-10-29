@@ -1,5 +1,5 @@
 // Photo timeout (i.e. time until "escape") in milliseconds
-const escapeTimeout = 5000;
+const escapeTimeout = 10000;
 
 // Time to show "revealed" image after user failure to detect (milliseconds)
 const revealTime = 1000;
