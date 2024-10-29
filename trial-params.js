@@ -9,7 +9,7 @@ const numPhotos = 30;
 
 // Amount to scale butterflies by - before use, it is multipled by the
 // background element width to account for differences between browsers
-const buttScale = 0.03 / 500;
+const buttScale = 0.03 / 100;
 
 // Where do we get photo info from?
 const PHOTOS_INFO_URL = "photo_info.csv";
