@@ -1,5 +1,7 @@
 # Creates the photo_info.csv file by listing all the available images in the relevant directories
 library(jpeg)
+library(png)
+library(JUtils)
 
 # Find all background images
 # Convert URLS to relative to the base directory
@@ -21,9 +23,14 @@ if (any(badAR)) {
 # Find all butterfly images
 butts <- data.frame(URL = file.path("images/butterflies", list.files("../images/butterflies", "*.png")), What = "Butt")
 
+
 all <- rbind(backs, butts)
 
 # Save it as a CSV
 write.csv(all, "../photo_info.csv", row.names = FALSE)
 
 cat(sprintf("Found %d butterflies and %d backgrounds\n", nrow(butts), nrow(backs)))
+
+
+
+
