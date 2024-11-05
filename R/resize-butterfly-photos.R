@@ -7,6 +7,9 @@ library(JUtils)
 ##################################################################################
 # Check and correct butterfly images sizes
 
+# Number of desired non-transparent pixels in each butterfly image
+TARGET_COUNT <- 30000
+
 
 # Plot all images in a directory on a grid with a constant scale
 plotAll <- function(dir) {
@@ -94,7 +97,6 @@ compareNoTransPixels <- function(..., proportion = FALSE) {
 
 
 # Read all the images in Big butts and resize them into Good butts
-TARGET_COUNT <- 30000
 scaleAll("../images/Big butts", "../images/Good butts", TARGET_COUNT)
 
 #compareNoTransPixels("../images/Big butts", "../images/Good butts")

@@ -5,7 +5,9 @@
 # Functions to download data from the Firebase cloud database.
 # We use the realtime Database, NOT Cloud Firestore.
 
-#library(fireData)
+library(lubridate)
+#devtools::install_github("JimMcL/JUtils")
+library(JUtils)
 
 # ==== Firebase fetcher ====
 
@@ -14,7 +16,7 @@ DB_URL <- Sys.getenv("DATABASE_URL")
 PROJECT_ID <- Sys.getenv("PROJECT_ID")
 PROJECT_DOMAIN <- Sys.getenv("AUTH_DOMAIN")
 
-# Details are stored in the environment so they are not in GutHub
+# Details are stored in the environment so they are not in GitHub
 # E.g. I define them in .Renviron, which is in .gitignore
 userEmail <- Sys.getenv("USER_EMAIL")
 userPassword <- Sys.getenv("USER_PASSWORD")
@@ -79,8 +81,6 @@ QueryFirebase <- function(startTime = NULL) {
   content
 }
 
-# Eg of usage
-# fb <- QueryFirebase("2019-12-24T14:20:52.071Z")
 
 # Get the data
 fbd <- QueryFirebase()
@@ -95,7 +95,39 @@ if (length(badTypes) > 0) {
 scores <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "score", fbd)))
 sessions <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "session", fbd)))
 
+# Convert from UTC to local time
+sessions$localTime <- as_datetime(sessions$created_at, tz = Sys.timezone())
+scores$localTime <- as_datetime(scores$created_at, tz = Sys.timezone())
+# Group backgrounds by type
+scores$bgType <- as.factor(sub("^([[:lower:]]+).*", "\\1", scores$backgroundUrl))
+
+
+# # Filter out sessions which didn't use the finalised images
+sessions <- sessions[sessions$localTime > ymd("2024-10-29"), ]
+# # Filter out Marilia's sessions 
+exclude <- c("cdb2f51d-b05e-c99c-5f09-94d795d3378f", # Marilia PC
+             "90edd518-a96d-b5ac-2488-e5b8ab7b2565"  # Marilia phone
+             )
+sessions <- sessions[!sessions$userId %in% exclude, ]
+scores <- scores[scores$sessionId %in% sessions$sessionId, ]
+
+# Check that we excluded all the old background images. Old ones were named "DSC..."
+badSessIds <- unique(scores$sessionId[!grepl("^[[:lower:]]", scores$backgroundUrl)])
+if (length(badSessIds) > 0) {
+  badSess <- sessions[sessions$sessionId %in% badSessIds, ]
+  warning(sprintf(" Old sessions included from dates: %s\n", JToSentence(unique(badSess$localTime))))
+}
+
+
+# Work out each butterfly/background combination in each session
+butgb <- paste(scores$butterflyUrl, scores$backgroundUrl, sep = "::")
+i <- seq_along(butgb)[-1]
+scores$comboId <- c(0, cumsum(butgb[i] != butgb[i - 1]))
+
 # Output a CSV for each type of data
 write.csv(scores, "score.csv", row.names = FALSE)
 write.csv(sessions, "session.csv", row.names = FALSE)
 
+cat(sprintf("Downloaded %d sessions from %d users with %d scores: %s escapes, %d misses and %d hits\n",
+            nrow(sessions), length(unique(sessions$userId)), nrow(scores),
+            sum(scores$score == "escape"), sum(scores$score == "miss"), sum(scores$score == "hit")))
