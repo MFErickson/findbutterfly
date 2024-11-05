@@ -70,10 +70,37 @@ scaleAll <- function(indir, outdir, targetPixels) {
   }
 }
 
+compareNoTransPixels <- function(..., proportion = FALSE) {
+  
+  dirs <- list(...)
+  # Count no. of non-transparent pixels
+  countPix <- function(dir) {
+    bf <- list.files(dir, "*.png", full.names = T)
+    buts <- sapply(bf, function(fn) {
+      png <- readPNG(fn, native = FALSE)
+      np <- sum(png[,,4] > 0.5)
+      if (proportion) {
+        np / length(png[, , 4])
+      } else {
+        np
+      }
+    })
+  }
+  
+  ld <- lapply(dirs, function(dir) density(countPix(dir)))
+  xlab <- if (proportion) { "Proportion non-transparent pixels" } else { "Non-transparent pixels" }
+  JPlotDensities(ld, legendLabels = unlist(dirs), xlab = xlab)
+}
+
+
 # Read all the images in Big butts and resize them into Good butts
-scaleAll("../images/Big butts", "../images/Good butts", 30000)
+TARGET_COUNT <- 30000
+scaleAll("../images/Big butts", "../images/Good butts", TARGET_COUNT)
+
+#compareNoTransPixels("../images/Big butts", "../images/Good butts")
+compareNoTransPixels("../images/butterflies")
+abline(v = TARGET_COUNT)
 
 JPlotToPNG("butts-original.png", plotAll("../images/Big butts"), width = 2000, aspect = 1)
 JPlotToPNG("butts-scaled.png", plotAll("../images/Good butts"), width = 2000, aspect = 1)
 
-           
