@@ -84,76 +84,94 @@ QueryFirebase <- function(startTime = NULL) {
   content
 }
 
+DownloadDbs <- function() {
+  #--------------------------------------------------------------#
+  # Get the data
+  fbd <- QueryFirebase()
+  # Get types of data
+  ntypes <- table(sapply(fbd, function(row) row$type))
+  types <- names(ntypes)
+  badTypes <- types[!types %in% c("score", "session")]
+  if (length(badTypes) > 0) {
+    stop(sprintf("Unexpected type %s", paste(badTypes, collapse = ", ")))
+  }
+  
+  # Load table of scores
+  scores <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "score", fbd)))
+  sessions <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "session", fbd)))
+  
+  #--------------------------------------------------------------#
+  # Synthesise some columns
+  
+  # Create a localTime column by converting from UTC to local time
+  sessions$localTime <- as_datetime(sessions$created_at, tz = Sys.timezone())
+  scores$localTime <- as_datetime(scores$created_at, tz = Sys.timezone())
+  
+  # Group backgrounds by type
+  scores$bgType <- as.factor(sub("^([[:lower:]]+).*", "\\1", scores$backgroundUrl))
+  
+  # Conspicuousness score is 1 for hit, 0 for escape
+  scores$conspicuousRatio <- ifelse(scores$score == "hit", 1, 0)
+  # Record butterfly/background combo
+  scores$combo <- paste(scores$bgType, scores$butterflyUrl, sep = "-")
+  
+  # Work out each butterfly/background combination in each session
+  i <- seq_along(scores$combo)[-1]
+  scores$comboId <- c(0, cumsum(scores$combo[i] != scores$combo[i - 1]))
 
-#--------------------------------------------------------------#
-# Get the data
-fbd <- QueryFirebase()
-# Get types of data
-types <- unique(sapply(fbd, function(row) row$type))
-badTypes <- types[!types %in% c("score", "session")]
-if (length(badTypes) > 0) {
-  stop(sprintf("Unexpected type %s", paste(badTypes, collapse = ", ")))
+  # Any hits over 10 seconds get turned into misses, since it shouldn't be possible to find it after 10 seconds
+  scores$score[scores$time > 10000] <- "escape"
+
+  #--------------------------------------------------------------#
+  # Filter out bad data for various reasons
+  
+  # # Filter out sessions which didn't use the finalised images
+  sessions <- sessions[sessions$localTime > ymd("2024-10-29"), ]
+  scores <- scores[scores$sessionId %in% sessions$sessionId, ]
+  
+  # Check that we excluded all the old background images. Old ones were named "DSC..."
+  badSessIds <- unique(scores$sessionId[!grepl("^[[:lower:]]", scores$backgroundUrl)])
+  if (length(badSessIds) > 0) {
+    badSess <- sessions[sessions$sessionId %in% badSessIds, ]
+    warning(sprintf(" Old sessions included from dates: %s\n", JToSentence(unique(badSess$localTime))))
+  }
+  
+  # Limit analysis to butterflies that have been tested at least 12 times because
+  # we removed some early on. Remove entire bad sessions
+  bt <- table(scores$butterflyUrl)
+  badSess <- scores$sessionId[scores$butterflyUrl %in%  names(bt)[bt < 15]]
+  
+  # Also remove some backgrounds
+  badSess <- c(badSess, scores$sessionId[scores$bgType == "mix"])
+  
+  # There are some weird times - presumably people paused then continued. Throw
+  # out the worst, then limit other to 10 seconds (we have already converted
+  # them all to escapes)
+  badSess <- c(badSess, scores$sessionId[scores$time > 10500],
+               scores$sessionId[scores$time <= 0])
+  scores$time[scores$time > 10000] <- 10000
+  
+  # Remove sessions where the user found < 3 butterflies, because presumably
+  # they didn't understand the game or there was a problem, so they skew the
+  # data. Count hits per session
+  hps <- aggregate(list(Found = scores$score), by = list(sessionId = scores$sessionId), FUN = function(x) sum(x == "hit"))
+  badSess <- c(badSess, hps$sessionId[hps$Found < 3])
+               
+  badSess <- unique(badSess)
+  scores <- scores[!scores$sessionId %in% badSess, ]
+  sessions <- sessions[!sessions$sessionId %in% badSess, ]
+  
+  #--------------------------------------------------------------#
+  # Write out the clean data
+  
+  # Output a CSV for each type of data
+  write.csv(scores, "score.csv", row.names = FALSE)
+  write.csv(sessions, "session.csv", row.names = FALSE)
+  
+  cat(sprintf("After cleaning, %d sessions from %d users with %d scores: %s escapes, %d misses and %d hits\n  Removed %d problematic sessions\n",
+              nrow(sessions), length(unique(sessions$userId)), nrow(scores),
+              sum(scores$score == "escape"), sum(scores$score == "miss"), sum(scores$score == "hit"),
+              length(badSess)))
 }
 
-# Load table of scores
-scores <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "score", fbd)))
-sessions <- do.call(rbind, Map(as.data.frame, Filter(function(row) row$type == "session", fbd)))
-
-#--------------------------------------------------------------#
-# Synthesise some columns
-
-# Create a localTime column by converting from UTC to local time
-sessions$localTime <- as_datetime(sessions$created_at, tz = Sys.timezone())
-scores$localTime <- as_datetime(scores$created_at, tz = Sys.timezone())
-
-# Group backgrounds by type
-scores$bgType <- as.factor(sub("^([[:lower:]]+).*", "\\1", scores$backgroundUrl))
-
-# Conspicuousness score is 1 for hit, 0 for escape
-scores$conspicuous <- ifelse(scores$score == "hit", 1, 0)
-# Record butterfly/background combo
-scores$combo <- paste(scores$bgType, scores$butterflyUrl, sep = "-")
-
-# Work out each butterfly/background combination in each session
-i <- seq_along(scores$combo)[-1]
-scores$comboId <- c(0, cumsum(scores$combo[i] != scores$combo[i - 1]))
-
-#--------------------------------------------------------------#
-# Filter out bad data for various reasons
-
-# # Filter out sessions which didn't use the finalised images
-sessions <- sessions[sessions$localTime > ymd("2024-10-29"), ]
-scores <- scores[scores$sessionId %in% sessions$sessionId, ]
-
-# Check that we excluded all the old background images. Old ones were named "DSC..."
-badSessIds <- unique(scores$sessionId[!grepl("^[[:lower:]]", scores$backgroundUrl)])
-if (length(badSessIds) > 0) {
-  badSess <- sessions[sessions$sessionId %in% badSessIds, ]
-  warning(sprintf(" Old sessions included from dates: %s\n", JToSentence(unique(badSess$localTime))))
-}
-
-# Limit analysis to butterflies that have been tested at least 12 times because
-# we removed some early on. Remove entire bad sessions
-bt <- table(scores$butterflyUrl)
-badSess <- scores$sessionId[scores$butterflyUrl %in%  names(bt)[bt < 15]]
-
-# Also remove some backgrounds
-badSess <- c(badSess, scores$sessionId[scores$bgType == "mix"])
-
-# There are some weird times - presumably people paused then continued
-badSess <- c(badSess, scores$sessionId[scores$time > 10500],
-             scores$sessionId[scores$time <= 0])
-
-scores <- scores[!scores$sessionId %in% badSess, ]
-sessions <- sessions[!sessions$sessionId %in% badSess, ]
-
-#--------------------------------------------------------------#
-# Write out the clean data
-
-# Output a CSV for each type of data
-write.csv(scores, "score.csv", row.names = FALSE)
-write.csv(sessions, "session.csv", row.names = FALSE)
-
-cat(sprintf("Downloaded %d sessions from %d users with %d scores: %s escapes, %d misses and %d hits\n",
-            nrow(sessions), length(unique(sessions$userId)), nrow(scores),
-            sum(scores$score == "escape"), sum(scores$score == "miss"), sum(scores$score == "hit")))
+DownloadDbs()

@@ -1,0 +1,25 @@
+
+> print(summary(brms_model))
+ Family: binomial 
+  Links: mu = logit 
+Formula: X240m | trials(Ndaphnia) ~ Dorsal.conspicuousness + Ventral.conspicuousness + (1 | gr(Phylo, cov = phylo_cov)) 
+   Data: dt_filtered (Number of observations: 418) 
+  Draws: 4 chains, each with iter = 5000; warmup = 1000; thin = 10;
+         total post-warmup draws = 1600
+
+Multilevel Hyperparameters:
+~Phylo (Number of levels: 45) 
+              Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+sd(Intercept)     1.14      0.18     0.84     1.54 1.00     1624     1424
+
+Regression Coefficients:
+                        Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
+Intercept                  -1.47      0.47    -2.41    -0.60 1.00     1457     1374
+Dorsal.conspicuousness     -0.33      0.59    -1.48     0.80 1.00     1648     1545
+Ventral.conspicuousness     1.11      0.58     0.02     2.26 1.00     1525     1495
+
+Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
+and Tail_ESS are effective sample size measures, and Rhat is the potential
+scale reduction factor on split chains (at convergence, Rhat = 1).
+
+> sink()

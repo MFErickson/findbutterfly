@@ -9,4 +9,10 @@ build-photo-info-csv.R: Script to update the photo_info.csv file, which lists al
 
 download-data.R: downloads the database of user scores. Relies on the existance of database credentials in the .Renviron file
 
-explore-data.R: Some very incomplete data exploration
+analysis.R: Reports various stats from the game data
+
+functions.R: Run from analysis.R
+
+dorsal-ventral.R: Run from analysis.R
+  
+background-anayses.R: Performs some analysis of background characteristics

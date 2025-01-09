@@ -5,6 +5,7 @@ library(Durga)
 
 df <- read.csv("score.csv")
 
+
 # Limit analysis to butterflies that have been tested at leat twice
 bt <- table(df$butterflyUrl)
 df <- df[df$butterflyUrl %in% names(bt)[bt > 2], ]
