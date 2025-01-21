@@ -7,6 +7,7 @@ library(brms)
 library(ggplot2)
 library(performance)
 library(missForest)
+library(dplyr)
 
 # Import data
 tree <- read.nexus("C:/Users/46090444/OneDrive/GitHub/Daphnia-toxicity/data/raw/AA154_secondary_only_strategyA.tre")
@@ -97,9 +98,9 @@ print(summary(brms_modelCD))
 sink()
 
 # Model checks
-pp_check2(brms_modelCD)
-bayes_R22(brms_modelCD)
-r2_results2 <- performance::r2(brms_modelCD)
+pp_check(brms_modelCD)
+bayes_R2(brms_modelCD)
+r2_results <- performance::r2(brms_modelCD)
 print(r2_results2)
 
 # Plot residuals
@@ -195,15 +196,15 @@ summary(brms_modelCD2)
 prior_summary(brms_modelCD2)
 
 # Save output
-output_file <- "output/brms-ConspicDiff.txt"
+output_file <- "output/brms-ConspicDiff2.txt"
 sink(output_file)
 print(summary(brms_modelCD2))
 sink()
 
 # Model checks
-pp_check2(brms_modelCD2)
-bayes_R22(brms_modelCD2)
-r2_results2 <- performance::r2(brms_modelCD2)
+pp_check(brms_modelCD2)
+bayes_R2(brms_modelCD2)
+r2_results <- performance::r2(brms_modelCD2)
 print(r2_results2)
 
 # Plot residuals
