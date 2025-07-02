@@ -5,7 +5,7 @@ participants to view a series of photos of butterflies, and locate the
 insect against the background. It is used to assess how conspicuous different butterflies are.
 
 This project is hosted on GitHub pages. The game can be accessed at
-https://mferickson.github.io/findbutterfly/
+https://XXXXXXXXX.github.io/findbutterfly/
 
 For local development, you can use the free Mongoose server from
 https://mongoose.ws/binary/. Copy the executable into this directory,
